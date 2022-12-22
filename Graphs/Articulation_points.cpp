@@ -14,7 +14,7 @@ using namespace std;
 const long long N = 200001, INF = 1000000000000000000;
 const char nl = '\n';
 
-void dfs_for_artic(int u, int &time, vector<vector<pii>> &adjList, vector<int> &parent, vector<int> &disc_time, vector<int> &low, vector<bool> &artic_points)
+void dfs_fill_disc(int u, int &time, vector<vector<pii>> &adjList, vector<int> &parent, vector<int> &disc_time, vector<int> &low, vector<bool> &artic_points)
 {
     disc_time[u] = time;
     low[u] = time;
@@ -27,24 +27,33 @@ void dfs_for_artic(int u, int &time, vector<vector<pii>> &adjList, vector<int> &
         int child = adjList[u][v].fi;
         if (disc_time[child] == -1)
         {
+
+            // if child node has not been visited before
+            // set parent of child node and increment the children count
             parent[child] = u;
             child_count++;
-            dfs_for_artic(child, time, adjList, parent, disc_time, low, artic_points);
 
+            dfs_fill_disc(child, time, adjList, parent, disc_time, low, artic_points);
+
+            // set the low for current node
             low[u] = min(low[u], low[child]);
 
             if (parent[child] == -1 && child_count > 1)
             {
+                // case 1:
                 artic_points[u] = 1;
             }
 
             else if (parent[child] != -1 && low[child] >= disc_time[u])
             {
+                // case 2:
                 artic_points[u] = 1;
             }
         }
         else if (parent[u] != child)
         {
+            // if child node has been visited before it is a back-edge
+            // set low for current node.
             low[u] = min(low[u], disc_time[child]);
         }
     }
@@ -61,7 +70,7 @@ void findArticulationPoint(int V, vector<vector<pii>> &adjList)
     {
         if (disc_time[i] == -1)
         {
-            dfs_for_artic(i, time, adjList, parent, disc_time, low, artic_points);
+            dfs_fill_disc(i, time, adjList, parent, disc_time, low, artic_points);
 
             time = 1;
         }
